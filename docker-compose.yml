@@ -1,0 +1,37 @@
+version: '3.7' # docker-composeの書式のバージョン
+services: # 以下にサーバー情報を記載
+  db: # DBサーバー
+    image: mariadb:latest # MariaDB最新版
+    # restart: always # always:Docker起動時に併せて起動
+    environment: # 環境変数
+      MYSQL_ROOT_PASSWORD: root # rootユーザのパスワード
+      MYSQL_DATABASE: dev # WordPress用データベース名
+      MYSQL_USER: dev # WordPress用接続ユーザ名
+      MYSQL_PASSWORD: dev # WordPress用パスワード
+  ap: # アプリケーションサーバー
+    image: wordpress:latest # WordPress最新版 https://hub.docker.com/_/wordpress
+    # restart: always # always:Docker起動時に併せて起動
+    depends_on: # 先に起動させるサーバを指定
+      - db
+    ports:
+      - '20080:80' # アプリケーションサーバーの80番ポートをローカルの20080番ポートにつなげる（http://localhost:20080 でアクセスできるようになる）
+    environment:
+      WORDPRESS_DB_HOST: db:3306 # データベースサーバー名：ポート番号
+      WORDPRESS_DB_USER: dev # WordPress用接続ユーザ名(dbの内容に合わせる)
+      WORDPRESS_DB_PASSWORD: dev # WordPress用パスワード(dbの内容に合わせる)
+      WORDPRESS_DB_NAME: dev # WordPress用データベース名(dbの内容に合わせる)
+  web:
+    build: ./web
+    ports:
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - ap
+    volumes_from:
+      - ap
+    volumes:
+      - ./web/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      default:
+        aliases:
+          - testdockerwp.lo
