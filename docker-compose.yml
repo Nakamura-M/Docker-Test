@@ -4,30 +4,30 @@ services: # 以下にサーバー情報を記載
     image: mariadb:latest # MariaDB最新版
     # restart: always # always:Docker起動時に併せて起動
     environment: # 環境変数
-      MYSQL_ROOT_PASSWORD: root # rootユーザのパスワード
-      MYSQL_DATABASE: dev # WordPress用データベース名
-      MYSQL_USER: dev # WordPress用接続ユーザ名
-      MYSQL_PASSWORD: dev # WordPress用パスワード
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} # rootユーザのパスワード
+      MYSQL_DATABASE: ${MYSQL_DATABASE} # WordPress用データベース名
+      MYSQL_USER: ${MYSQL_USER} # WordPress用接続ユーザ名
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD} # WordPress用パスワード
     volumes:
-      - ./db:/var/lib/db
+      - './db:/var/lib/mysql'
+      - './db/initdb.d:/docker-entrypoint-initdb.d'
   app: # アプリケーションサーバー
-    image: wordpress:latest # WordPress最新版 https://hub.docker.com/_/wordpress
+    image: wordpress:php7.4-fpm # https://hub.docker.com/_/wordpress
     # restart: always # always:Docker起動時に併せて起動
     depends_on: # 先に起動させるサーバを指定
       - db
-    ports:
-      - '20081:80'
+
     environment:
-      WORDPRESS_DB_HOST: db:3306 # データベースサーバー名：ポート番号
-      WORDPRESS_DB_USER: dev # WordPress用接続ユーザ名(dbの内容に合わせる)
-      WORDPRESS_DB_PASSWORD: dev # WordPress用パスワード(dbの内容に合わせる)
-      WORDPRESS_DB_NAME: dev # WordPress用データベース名(dbの内容に合わせる)
+      WORDPRESS_DB_HOST: db # データベースサーバー名
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE} # WordPress用データベース名(dbの内容に合わせる)
+      WORDPRESS_DB_USER: ${MYSQL_USER} # WordPress用接続ユーザ名(dbの内容に合わせる)
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD} # WordPress用パスワード(dbの内容に合わせる)
     volumes:
       - ./app:/var/www/html
   nginx: # Webサーバー
     image: nginx:stable # Nginx安定版
     ports:
-      - '20080:80' # アプリケーションサーバーの80番ポートをローカルの20080番ポートにつなげる（http://localhost:20080 でアクセスできるようになる）
+      - '${NGINX_HOST_PORT_80}:80'
     depends_on:
       - app
     volumes:
@@ -35,7 +35,7 @@ services: # 以下にサーバー情報を記載
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/log:/var/log/nginx
       - ./app:/var/www/html
-    networks:
-      default:
-        aliases:
-          - testdockerwp.lo # 指定のドメインでアクセス可能にする
+    # networks:
+    # default:
+    #   aliases:
+    #     - ${NGINX_DOMAIN} # 指定のドメインでアクセス可能にする
