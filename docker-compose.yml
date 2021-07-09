@@ -14,9 +14,8 @@ services: # 以下にサーバー情報を記載
   app: # アプリケーションサーバー
     image: wordpress:php7.4-fpm # https://hub.docker.com/_/wordpress
     # restart: always # always:Docker起動時に併せて起動
-    depends_on: # 先に起動させるサーバを指定
+    depends_on: # 先に起動させるサーバー
       - db
-
     environment:
       WORDPRESS_DB_HOST: db # データベースサーバー名
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE} # WordPress用データベース名(dbの内容に合わせる)
@@ -28,7 +27,7 @@ services: # 以下にサーバー情報を記載
     image: nginx:stable # Nginx安定版
     ports:
       - '${NGINX_HOST_PORT_80}:80'
-    depends_on:
+    depends_on: # 先に起動させるサーバー
       - app
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
