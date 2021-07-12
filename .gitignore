@@ -1,4 +1,5 @@
 app
+db
 nginx/log
 
 *ib_doublewrite
