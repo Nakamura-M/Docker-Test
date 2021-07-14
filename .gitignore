@@ -1,6 +1,6 @@
-app
-db
-nginx/log
+docker/app
+docker/db
+docker/nginx/log
 
 *ib_doublewrite
 *ib_logfile0

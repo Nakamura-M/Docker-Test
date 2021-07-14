@@ -9,8 +9,8 @@ services: # 以下にサーバー情報を記載
       MYSQL_USER: ${MYSQL_USER} # WordPress用接続ユーザ名
       MYSQL_PASSWORD: ${MYSQL_PASSWORD} # WordPress用パスワード
     volumes:
-      - './db:/var/lib/mysql'
-      - './db/initdb.d:/docker-entrypoint-initdb.d'
+      - './docker/db:/var/lib/mysql'
+      - './docker/db/initdb.d:/docker-entrypoint-initdb.d'
   app: # アプリケーションサーバー
     image: wordpress:php7.4-fpm # https://hub.docker.com/_/wordpress
     # restart: always # always:Docker起動時に併せて起動
@@ -22,7 +22,7 @@ services: # 以下にサーバー情報を記載
       WORDPRESS_DB_USER: ${MYSQL_USER} # WordPress用接続ユーザ名(dbの内容に合わせる)
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD} # WordPress用パスワード(dbの内容に合わせる)
     volumes:
-      - ./app:/var/www/html
+      - ./docker/app:/var/www/html
   nginx: # Webサーバー
     image: nginx:stable # Nginx安定版
     ports:
@@ -30,10 +30,10 @@ services: # 以下にサーバー情報を記載
     depends_on: # 先に起動させるサーバー
       - app
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/log:/var/log/nginx
-      - ./app:/var/www/html
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./docker/nginx/log:/var/log/nginx
+      - ./docker/app:/var/www/html
     # networks:
     # default:
     #   aliases:
